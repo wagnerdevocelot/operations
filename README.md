@@ -84,6 +84,26 @@ Recebe uma lista de operações financeiras e as envia para processamento.
 }
 ```
 
+**Exemplos com curl:**
+
+Exemplo 1:
+```bash
+curl -X POST http://localhost:3000/operations \
+  -H "Content-Type: application/json" \
+  -d '[{"operation":"buy", "unit-cost":10.00, "quantity": 100},
+       {"operation":"sell", "unit-cost":15.00, "quantity": 50},
+       {"operation":"sell", "unit-cost":15.00, "quantity": 50}]'
+```
+
+Exemplo 2:
+```bash
+curl -X POST http://localhost:3000/operations \
+  -H "Content-Type: application/json" \
+  -d '[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
+       {"operation":"sell", "unit-cost":20.00, "quantity": 5000},
+       {"operation":"sell", "unit-cost":5.00, "quantity": 5000}]'
+```
+
 ## Configuração
 
 ### Variáveis de ambiente
