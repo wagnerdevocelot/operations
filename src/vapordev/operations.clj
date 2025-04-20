@@ -29,10 +29,9 @@
 
 (defn handler
   "Handler para o endpoint /operations que processa operações recebidas.
-   Adiciona um timestamp a cada operação e envia para o tópico Kafka."
+   Envia as operações para o tópico Kafka."
   [request]
-  (let [body (json/parse-string (slurp (:body request)) true)
-        operations (map #(assoc % :timestamp (System/currentTimeMillis)) body)]
+  (let [operations (json/parse-string (slurp (:body request)) true)]
     (with-open [producer (create-producer)]
       (doseq [operation operations]
         (kafka/produce! producer topic-config (str (UUID/randomUUID)) operation)))
