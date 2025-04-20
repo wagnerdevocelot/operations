@@ -3,7 +3,8 @@
         ring/ring-core {:mvn/version "1.11.0"}
         ring/ring-jetty-adapter {:mvn/version "1.11.0"}
         cheshire/cheshire {:mvn/version "5.11.0"}
-        fundingcircle/jackdaw {:mvn/version "0.9.12"}}
+        fundingcircle/jackdaw {:mvn/version "0.9.12"}
+        org.slf4j/slf4j-nop {:mvn/version "1.7.32"}}
  :aliases
  {:run-m {:main-opts ["-m" "vapordev.operations"]}
   :run-x {:ns-default vapordev.operations
@@ -18,7 +19,9 @@
   :test {:extra-paths ["test"]
          :extra-deps {org.clojure/test.check {:mvn/version "1.1.1"}
                       io.github.cognitect-labs/test-runner
-                      {:git/tag "v0.5.0" :git/sha "48c3c67"}}}}
+                      {:git/tag "v0.5.0" :git/sha "48c3c67"}
+                      org.apache.kafka/kafka-streams-test-utils {:mvn/version "3.7.0"}
+                      ring/ring-mock {:mvn/version "0.4.0"}}}}
  :mvn/repos
  {"central" {:url "https://repo1.maven.org/maven2/"}
   "clojars" {:url "https://repo.clojars.org/"}
