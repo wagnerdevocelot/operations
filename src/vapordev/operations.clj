@@ -1,11 +1,12 @@
 (ns vapordev.operations
   (:require
    [ring.adapter.jetty :refer [run-jetty]]
-   [ring.util.response :refer [response]]
+   [ring.util.response :refer [response content-type]]
    [cheshire.core :as json]
    [jackdaw.client :as kafka]
    [jackdaw.serdes :refer [string-serde edn-serde]])
-  (:import [java.util UUID])
+  (:import [java.util UUID]
+           [java.util.concurrent Executors])
   (:gen-class))
 
 (def topic-config
@@ -27,20 +28,55 @@
   []
   (kafka/producer producer-config))
 
+;; Criar um pool de threads para envios assíncronos ao Kafka
+(def executor (Executors/newFixedThreadPool 4))
+
+(defn send-to-kafka-async
+  "Envia operações para o Kafka de forma assíncrona"
+  [operations]
+  (.submit executor
+           (reify java.util.concurrent.Callable
+             (call [_]
+               (try
+                 (with-open [producer (create-producer)]
+                   (doseq [operation operations]
+                     (kafka/produce! producer topic-config (str (UUID/randomUUID)) operation)))
+                 (println "Operações enviadas com sucesso para o Kafka")
+                 (catch Exception e
+                   (println "Erro ao enviar operações para o Kafka:" (.getMessage e))))))))
+
 (defn handler
   "Handler para o endpoint /operations que processa operações recebidas.
-   Envia as operações para o tópico Kafka."
+   Envia as operações para o tópico Kafka de forma assíncrona."
   [request]
-  (let [operations (json/parse-string (slurp (:body request)) true)]
-    (with-open [producer (create-producer)]
-      (doseq [operation operations]
-        (kafka/produce! producer topic-config (str (UUID/randomUUID)) operation)))
-    (response {:message "Operations processed successfully"})))
+  (try
+    (let [operations (json/parse-string (slurp (:body request)) true)]
+      (try
+        ;; Enviar para o Kafka assincronamente
+        (send-to-kafka-async operations)
+
+        ;; Retornar resposta imediatamente
+        (-> (json/generate-string {:message "Operations processed successfully"})
+            response
+            (content-type "application/json")
+            (assoc :status 201))
+        (catch Exception e
+          (println "Erro ao preparar envio para o Kafka:" (.getMessage e))
+          (-> (json/generate-string {:error (str "Erro ao preparar envio para o Kafka: " (.getMessage e))})
+              response
+              (content-type "application/json")
+              (assoc :status 500)))))
+    (catch Exception e
+      (println "Erro ao processar requisição:" (.getMessage e))
+      (-> (json/generate-string {:error (.getMessage e)})
+          response
+          (content-type "application/json")
+          (assoc :status 500)))))
 
 (defn start-server
   "Inicia o servidor HTTP na porta especificada."
   [port]
-  (run-jetty handler {:port port}))
+  (run-jetty handler {:port port :join? false}))
 
 (defn get-env-var
   "Função wrapper para obter variáveis de ambiente"
