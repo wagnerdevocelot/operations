@@ -46,9 +46,9 @@
                  (with-open [producer (create-producer)]
                    ;; Enviando todas as operações como um único evento
                    (let [event-id (str (UUID/randomUUID))]
-                     (kafka/produce! producer 
-                                    topic-config 
-                                    event-id 
+                     (kafka/produce! producer
+                                    topic-config
+                                    event-id
                                     (json/generate-string operations))))
                  (println "Operações enviadas com sucesso para o Kafka como um evento único")
                  (catch Exception e
@@ -96,14 +96,14 @@
             response
             (content-type "application/json")
             (assoc :status 500))))
-    
+
     [:get "/health"]
     (-> (json/generate-string {:app "operations-service"
                                 :status "up"
                                 :kafka (kafka-health-check)})
         response
         (content-type "application/json"))
-    
+
     ;; Rota não encontrada
     (-> (json/generate-string {:error "Not found"})
         response
