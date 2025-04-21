@@ -1,140 +1,96 @@
 # Serviço de Operações
 
-Microserviço responsável por receber e processar operações financeiras, enviando-as para um tópico Kafka para processamento posterior.
-
-## Visão Geral
-
-Este serviço oferece uma API REST para receber operações financeiras (como compra e venda) e as publica em um tópico Kafka para processamento posterior.
+Microserviço para receber operações financeiras e enviá-las a um tópico Kafka.
 
 ## Requisitos
 
 - JDK 8 ou superior
-- [Clojure](https://clojure.org/guides/getting_started)
-- [Kafka](https://kafka.apache.org/) (para execução local)
+- Clojure
+- Kafka
 
 ## Instalação
-
-Clone o repositório:
 
 ```
 git clone https://github.com/vapordev/operations.git
 cd operations
 ```
 
-## Uso
+## Execução
 
-### Executar o serviço
+### Local
 
-Iniciar o serviço na porta padrão (3000):
-
-```
+```bash
+# Porta padrão (3000)
 clojure -M:run-m
-```
 
-Iniciar o serviço em uma porta específica:
-
-```
+# Porta específica
 PORT=8080 clojure -M:run-m
 ```
 
-### Construir um uberjar
+### Com Docker Compose
 
-Para criar um arquivo JAR executável:
+```bash
+# Iniciar
+docker-compose up -d
 
+# Parar
+docker-compose down
 ```
+
+### JAR
+
+```bash
+# Construir
 clojure -T:build ci
-```
 
-Executar o JAR gerado:
-
-```
+# Executar
 java -jar target/operations-0.1.0-SNAPSHOT.jar
 ```
 
+## Serviços disponíveis
+
+| Serviço | Porta | Descrição |
+|---------|-------|-----------|
+| Aplicação | 3000 | API de operações |
+| Kafka UI | 8080 | Interface web para Kafka |
+| Kafka | 9092, 29092 | Broker Kafka |
+| Zookeeper | 2181 | Coordenação do Kafka |
+
 ## API
 
-### Endpoint `/operations`
+### POST /operations
 
-**POST /operations**
+Recebe operações financeiras para processamento.
 
-Recebe uma lista de operações financeiras e as envia para processamento.
-
-**Exemplo de requisição:**
-
-```json
-[
-  {
-    "operation": "buy",
-    "unit-cost": 10.00,
-    "quantity": 10000
-  },
-  {
-    "operation": "sell",
-    "unit-cost": 20.00,
-    "quantity": 5000
-  }
-]
-```
-
-**Resposta de sucesso:**
-
-```json
-{
-  "message": "Operations processed successfully"
-}
-```
-
-**Exemplos com curl:**
-
-Exemplo 1:
 ```bash
 curl -X POST http://localhost:3000/operations \
   -H "Content-Type: application/json" \
   -d '[{"operation":"buy", "unit-cost":10.00, "quantity": 100},
-       {"operation":"sell", "unit-cost":15.00, "quantity": 50},
        {"operation":"sell", "unit-cost":15.00, "quantity": 50}]'
 ```
 
-Exemplo 2:
+### GET /health
+
+Verifica o status da aplicação e conexão com Kafka.
+
 ```bash
-curl -X POST http://localhost:3000/operations \
-  -H "Content-Type: application/json" \
-  -d '[{"operation":"buy", "unit-cost":10.00, "quantity": 10000},
-       {"operation":"sell", "unit-cost":20.00, "quantity": 5000},
-       {"operation":"sell", "unit-cost":5.00, "quantity": 5000}]'
+curl http://localhost:3000/health
 ```
 
-## Configuração
+## Acessando eventos via Kafka UI
 
-### Variáveis de ambiente
+Além da API, você também pode acessar os eventos enviados através da interface gráfica do Kafka UI:
 
-- `PORT`: Porta em que o servidor HTTP será executado (padrão: 3000)
-
-### Configuração do Kafka
-
-As configurações do Kafka estão disponíveis no arquivo `operations.clj`:
-
-- Tópico: "operations"
-- Bootstrap servers: "localhost:9092" (padrão)
+Acesse a interface web do Kafka UI em [http://localhost:8080](http://localhost:8080)
 
 ## Desenvolvimento
 
-### Executar testes
-
+```bash
+# Executar testes
+clojure -X:test
 ```
-clojure -T:build test
-```
-
-### Dependências
-
-As principais dependências do projeto incluem:
-
-- Ring: Framework web para Clojure
-- Cheshire: Biblioteca para manipulação de JSON
-- Jackdaw: Cliente Kafka para Clojure
 
 ## Licença
 
 Copyright © 2025 Vapordev
-
-Distribuído sob a Eclipse Public License versão 1.0.
+Eclipse Public License versão 1.0.

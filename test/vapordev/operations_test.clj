@@ -23,12 +23,23 @@
   nil)
 
 (deftest send-to-kafka-async-test
-  (testing "Envio assíncrono para o Kafka"
-    (with-redefs [vapordev.operations/create-producer (fn [] (MockProducer.))
-                  jackdaw-client/produce! mock-produce!]
-      (let [operations [{"operation" "buy", "unit-cost" 10.00, "quantity" 1000}]
-            result (send-to-kafka-async operations)]
-        (is (instance? Future result))))))
+  (testing "Envio assíncrono para o Kafka como um único evento"
+    (let [captured-data (atom nil)
+          operations [{"operation" "buy", "unit-cost" 10.00, "quantity" 1000}
+                      {"operation" "sell", "unit-cost" 20.00, "quantity" 5000}]]
+      (with-redefs [vapordev.operations/create-producer (fn [] (MockProducer.))
+                    jackdaw-client/produce! (fn [_ _ _ data]
+                                              (reset! captured-data data)
+                                              nil)]
+        (let [result (send-to-kafka-async operations)]
+          ;; Verificando se retorna um Future
+          (is (instance? Future result))
+          
+          ;; Aguardar a conclusão do Future (simplificado para testes)
+          (Thread/sleep 100)
+          
+          ;; Verificando se os dados capturados contêm todas as operações como um único evento
+          (is (= (json/parse-string @captured-data) operations)))))))
 
 (deftest post-operations-endpoint-test
   (testing "POST /operations endpoint"
