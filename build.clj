@@ -4,7 +4,7 @@
 
 (def lib 'net.clojars.vapordev/operations)
 (def version "0.1.0-SNAPSHOT")
-(def main 'vapordev.operations.core)
+(def main 'vapordev.operations.main)
 
 (defn test "Run the tests." [opts]
   (bb/run-tests opts))
