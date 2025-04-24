@@ -7,7 +7,7 @@
         org.slf4j/slf4j-nop {:mvn/version "1.7.32"}
         org.apache.kafka/kafka-streams-test-utils {:mvn/version "3.7.0"}}
  :aliases
- {:run-m {:main-opts ["-m" "vapordev.operations"]}
+ {:run-m {:main-opts ["-m" "vapordev.operations.main"]}
   :run-x {:ns-default vapordev.operations
           :exec-fn greet
           :exec-args {:name "Clojure"}}
