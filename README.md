@@ -87,7 +87,7 @@ Acesse a interface web do Kafka UI em [http://localhost:8080](http://localhost:8
 
 ```bash
 # Executar testes
-clojure -X:test
+clojure -M:test -m cognitect.test-runner
 ```
 
 ## Licença
